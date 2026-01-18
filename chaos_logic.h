@@ -3,7 +3,6 @@
 
 #include "main_logic.h"
 
-void check_collisions(astra stars[], int count);
-void handle_collision(astra *star1, astra *star2);
+void handle_collision(astra *star1, astra *star2, astra stars[], int *star_count, int max_count);
 
 #endif

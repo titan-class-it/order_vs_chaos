@@ -1,5 +1,8 @@
 #include "main_logic.h"
+
+#include "collisions.h"
 #include "chaos_logic.h"
+#include "order_logic.h"
 
 astra stars[QUANTITY_STARS];
 
@@ -54,6 +57,19 @@ void move_stars(astra stars[], int count) {
     }
 }
 
+// Функция превращения в альфа-звезду при достижении счета
+void check_alpha_transformation(astra stars[], int count) {
+    for (int i = 0; i < count; i++) {
+        if (stars[i].is_active && stars[i].score >= 3) { // Порог для альфа-звезды
+            if (stars[i].type == ORDER) {
+                stars[i].type = ALFA_ORDER;
+            } else if (stars[i].type == CHAOS) {
+                stars[i].type = ALFA_CHAOS;
+            }
+        }
+    }
+}
+
 // Отрисовка с использованием ncurses
 void draw_pool_ncurses(int pool[HI][LE]) {
     for (int i = 0; i < HI; i++) {
@@ -97,6 +113,7 @@ void draw_pool_ncurses(int pool[HI][LE]) {
 
 int main() {
     int pool[HI][LE];
+    int active_star_count = QUANTITY_STARS;
     
     // Инициализация ncurses
     initscr();
@@ -143,17 +160,20 @@ int main() {
         move_stars(stars, QUANTITY_STARS);
         
         // Проверяем столкновения
-        check_collisions(stars, QUANTITY_STARS);
+        check_collisions(stars, &active_star_count, QUANTITY_STARS);
+        
+        // Проверяем превращение в альфа-звезды
+        check_alpha_transformation(stars, QUANTITY_STARS);
         
         // Обновляем pool
         for (int i = 0; i < QUANTITY_STARS; i++) {
             if (stars[i].is_active) {
                 int value;
                 switch(stars[i].type) {
-                    case 'o': value = 2; break;  // ORDER
-                    case 'O': value = 3; break;  // ALFA_ORDER
-                    case 'x': value = 4; break;  // CHAOS
-                    case 'X': value = 5; break;  // ALFA_CHAOS
+                    case ORDER: value = 2; break;        // 'o'
+                    case ALFA_ORDER: value = 3; break;   // 'O'
+                    case CHAOS: value = 4; break;        // 'x'
+                    case ALFA_CHAOS: value = 5; break;   // 'X'
                     default:  value = 0;
                 }
                 

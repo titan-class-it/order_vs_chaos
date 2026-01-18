@@ -37,19 +37,21 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
-TARGET = order_vs_chaos
-LIBS = -lncurses
+LDFLAGS = -lncurses
 
-SRCS = main_logic.c chaos_logic.c
+SRCS = main_logic.c chaos_logic.c order_logic.c collisions.c
 OBJS = $(SRCS:.c=.o)
+TARGET = order_vs_chaos
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-run: $(TARGET)
-	./$(TARGET)
+.PHONY: all clean
