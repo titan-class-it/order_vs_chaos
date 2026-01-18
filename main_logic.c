@@ -1,4 +1,6 @@
 #include "main_logic.h"
+#include "order_logic.h"
+#include "chaos_logic.h"
 
 int main() {
   int pool[HI][LE] = {0};
