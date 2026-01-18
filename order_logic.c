@@ -13,14 +13,19 @@ int is_cell_occupied(astra stars[], int max_count, int x, int y) {
     return 0;
 }
 
-void order_reproduce(astra *star1, astra *star2, astra stars[], int *star_count, int max_count) {
+// Вспомогательная функция для поиска неактивной звезды
+int find_inactive_star_idx(astra stars[], int max_count) {
+    for (int i = 0; i < max_count; i++) {
+        if (!stars[i].is_active) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void order_reproduce(astra *star1, astra *star2, astra stars[], int max_count) {
     // Используем параметры, чтобы убрать предупреждения
     (void)star2; // Пока не используется, но оставляем для будущего
-    
-    // Только если есть свободное место
-    if (*star_count >= max_count) {
-        return;
-    }
     
     // Ищем свободное место рядом
     int attempts = 0;
@@ -47,18 +52,17 @@ void order_reproduce(astra *star1, astra *star2, astra stars[], int *star_count,
     
     if (attempts < 100) {
         // Создаем новую звезду ORDER
-        for (int i = 0; i < max_count; i++) {
-            if (!stars[i].is_active) {
-                stars[i].pixel_x = new_x;
-                stars[i].pixel_y = new_y;
-                stars[i].move_on_x = (rand() % 3) - 1;
-                stars[i].move_on_y = (rand() % 3) - 1;
-                stars[i].type = ORDER;
-                stars[i].score = 0;
-                stars[i].is_active = 1;
-                (*star_count)++;
-                break;
-            }
+        int idx = find_inactive_star_idx(stars, max_count);
+        if (idx != -1) {
+            stars[idx].pixel_x = new_x;
+            stars[idx].pixel_y = new_y;
+            stars[idx].move_on_x = (rand() % 3) - 1;
+            if (stars[idx].move_on_x == 0) stars[idx].move_on_x = 1;
+            stars[idx].move_on_y = (rand() % 3) - 1;
+            stars[idx].type = ORDER;
+            stars[idx].score = 0;
+            stars[idx].is_active = 1;
         }
+        // Если нет свободных мест, ничего не делаем
     }
 }

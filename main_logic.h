@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <ncurses.h>
 
-
-
 typedef struct
 {
     int pixel_x;
@@ -20,24 +18,24 @@ typedef struct
     int is_active;
 } astra;
 
-// Увеличиваем количество звезд для размножения
 #define HI 30
 #define LE 90
-#define QUANTITY_STARS 100  // Увеличили для размножения
+#define QUANTITY_STARS 1000
 #define SPEED 100
 
 #define ORDER 'o'
 #define ALFA_ORDER 'O'
 #define CHAOS 'x'
 #define ALFA_CHAOS 'X'
+#define MEGA_CHAOS 'M'
 
 #define ORDER_COLOR_PAIR 1
 #define ALFA_ORDER_COLOR_PAIR 2
 #define CHAOS_COLOR_PAIR 3
 #define ALFA_CHAOS_COLOR_PAIR 4
-#define BORDER_COLOR_PAIR 5
+#define MEGA_CHAOS_COLOR_PAIR 5
+#define BORDER_COLOR_PAIR 6
 
-// Прототипы
 void init_stars(astra stars[], int count);
 void move_stars(astra stars[], int count);
 void draw_pool_ncurses(int pool[HI][LE]);

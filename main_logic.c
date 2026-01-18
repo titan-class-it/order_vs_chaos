@@ -1,5 +1,4 @@
 #include "main_logic.h"
-
 #include "collisions.h"
 #include "chaos_logic.h"
 #include "order_logic.h"
@@ -57,19 +56,6 @@ void move_stars(astra stars[], int count) {
     }
 }
 
-// Функция превращения в альфа-звезду при достижении счета
-void check_alpha_transformation(astra stars[], int count) {
-    for (int i = 0; i < count; i++) {
-        if (stars[i].is_active && stars[i].score >= 3) { // Порог для альфа-звезды
-            if (stars[i].type == ORDER) {
-                stars[i].type = ALFA_ORDER;
-            } else if (stars[i].type == CHAOS) {
-                stars[i].type = ALFA_CHAOS;
-            }
-        }
-    }
-}
-
 // Отрисовка с использованием ncurses
 void draw_pool_ncurses(int pool[HI][LE]) {
     for (int i = 0; i < HI; i++) {
@@ -84,25 +70,30 @@ void draw_pool_ncurses(int pool[HI][LE]) {
                 addch('*');
                 attroff(COLOR_PAIR(BORDER_COLOR_PAIR));
             }
-            else if (value == 2) { // ORDER 'o'
+            else if (value == 2) { // ORDER 'o' - зеленый
                 attron(COLOR_PAIR(ORDER_COLOR_PAIR));
                 addch('o');
                 attroff(COLOR_PAIR(ORDER_COLOR_PAIR));
             }
-            else if (value == 3) { // ALFA_ORDER 'O'
+            else if (value == 3) { // ALFA_ORDER 'O' - ярко-зеленый
                 attron(COLOR_PAIR(ALFA_ORDER_COLOR_PAIR) | A_BOLD);
                 addch('O');
                 attroff(COLOR_PAIR(ALFA_ORDER_COLOR_PAIR) | A_BOLD);
             }
-            else if (value == 4) { // CHAOS 'x'
+            else if (value == 4) { // CHAOS 'x' - красный
                 attron(COLOR_PAIR(CHAOS_COLOR_PAIR));
                 addch('x');
                 attroff(COLOR_PAIR(CHAOS_COLOR_PAIR));
             }
-            else if (value == 5) { // ALFA_CHAOS 'X'
+            else if (value == 5) { // ALFA_CHAOS 'X' - ярко-красный
                 attron(COLOR_PAIR(ALFA_CHAOS_COLOR_PAIR) | A_BOLD);
                 addch('X');
                 attroff(COLOR_PAIR(ALFA_CHAOS_COLOR_PAIR) | A_BOLD);
+            }
+            else if (value == 6) { // MEGA_CHAOS 'M' - ярко-пурпурный
+                attron(COLOR_PAIR(MEGA_CHAOS_COLOR_PAIR) | A_BOLD);
+                addch('M');
+                attroff(COLOR_PAIR(MEGA_CHAOS_COLOR_PAIR) | A_BOLD);
             }
             else {
                 addch(' ');
@@ -125,10 +116,23 @@ int main() {
     // Инициализация цветов ncurses
     if (has_colors()) {
         start_color();
+        
+        // ORDER - зеленый
         init_pair(ORDER_COLOR_PAIR, COLOR_GREEN, COLOR_BLACK);
+        
+        // ALFA_ORDER - ярко-зеленый (зеленый с жирным)
         init_pair(ALFA_ORDER_COLOR_PAIR, COLOR_GREEN, COLOR_BLACK);
+        
+        // CHAOS - красный
         init_pair(CHAOS_COLOR_PAIR, COLOR_RED, COLOR_BLACK);
-        init_pair(ALFA_CHAOS_COLOR_PAIR, COLOR_MAGENTA, COLOR_BLACK);
+        
+        // ALFA_CHAOS - ярко-красный (красный с жирным)
+        init_pair(ALFA_CHAOS_COLOR_PAIR, COLOR_RED, COLOR_BLACK);
+        
+        // MEGA_CHAOS - ярко-пурпурный (пурпурный с жирным)
+        init_pair(MEGA_CHAOS_COLOR_PAIR, COLOR_MAGENTA, COLOR_BLACK);
+        
+        // Границы - белый
         init_pair(BORDER_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
     }
     
@@ -160,20 +164,18 @@ int main() {
         move_stars(stars, QUANTITY_STARS);
         
         // Проверяем столкновения
-        check_collisions(stars, &active_star_count, QUANTITY_STARS);
-        
-        // Проверяем превращение в альфа-звезды
-        check_alpha_transformation(stars, QUANTITY_STARS);
+        check_collisions(stars, QUANTITY_STARS);
         
         // Обновляем pool
         for (int i = 0; i < QUANTITY_STARS; i++) {
             if (stars[i].is_active) {
                 int value;
                 switch(stars[i].type) {
-                    case ORDER: value = 2; break;        // 'o'
-                    case ALFA_ORDER: value = 3; break;   // 'O'
-                    case CHAOS: value = 4; break;        // 'x'
-                    case ALFA_CHAOS: value = 5; break;   // 'X'
+                    case ORDER: value = 2; break;        // 'o' - зеленый
+                    case ALFA_ORDER: value = 3; break;   // 'O' - ярко-зеленый
+                    case CHAOS: value = 4; break;        // 'x' - красный
+                    case ALFA_CHAOS: value = 5; break;   // 'X' - ярко-красный
+                    case MEGA_CHAOS: value = 6; break;   // 'M' - ярко-пурпурный
                     default:  value = 0;
                 }
                 
