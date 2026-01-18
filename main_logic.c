@@ -32,6 +32,8 @@ int main() {
       }
     }
 
+    check_collisions(stars, QUANTITY_STARS);
+
     // Рисуем активные звезды
     for (int i = 0; i < QUANTITY_STARS; i++) {
       if (stars[i].is_active) {

@@ -8,8 +8,8 @@
 // #include <windows.h>
 #include <time.h>
 
-#include "chaos_logic.h"
-#include "order_logic.h"
+// #include "chaos_logic.h"
+// #include "order_logic.h"
 
 typedef struct
 {
@@ -35,13 +35,17 @@ typedef struct
 #define COLOR_BLUE 9   // Ярко-синий
 
 // Существа
-#define ORDER 'O'
-#define CHAOS 'X'
-#define STONE '#'
-#define ALFA_CHAOS '@'
+#define ORDER 'o'
+#define ALFA_ORDER 'O'
+#define CHAOS 'x'
+#define ALFA_CHAOS 'X'
+#define STONE '@'
+
+
 
 // Цвета (Windows)
 #define ORDER_COLOR 10		// Ярко-зеленый
+#define ALFA_ORDER_COLOR 10 // Ярко-зеленый
 #define CHAOS_COLOR 12		// Ярко-красный
 #define ALFA_CHAOS_COLOR 13 // Ярко-пурпурный
 #define STONE_COLOR 7		// Белый/серый (стандартный)
