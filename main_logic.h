@@ -1,8 +1,15 @@
+#ifndef MAIN_LOGIC_H
+#define MAIN_LOGIC_H
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 // #include <windows.h>
 #include <time.h>
+
+#include "chaos_logic.h"
+#include "order_logic.h"
 
 typedef struct
 {
@@ -48,6 +55,6 @@ void init_stars(astra stars[], int count); // Новая функция для �
 // Цвета
 void set_text_color(int color_code);
 void reset_text_color();
-// Пожиратели
-void check_collisions(astra stars[], int count);
-void handle_collision(astra *star1, astra *star2);
+
+
+#endif // MAIN_LOGIC_H
