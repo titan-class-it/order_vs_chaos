@@ -2,65 +2,74 @@
 #include "order_logic.h"
 #include "chaos_logic.h"
 
+#include "main_logic.h"
+#include "order_logic.h"
+#include "chaos_logic.h"
+
+astra stars[QUANTITY_STARS]; // Объявление массива звезд
+
 int main() {
-  int pool[HI][LE] = {0};
-  astra stars[QUANTITY_STARS];
-
-  // Инициализируем генератор случайных чисел
-  srand(time(NULL));
-
-  // Инициализируем все звезды
-  init_stars(stars, QUANTITY_STARS);
-
-  while (1) {
-    // Очищаем предыдущие позиции ВСЕХ звездочек
-    for (int i = 0; i < QUANTITY_STARS; i++) {
-      clear_pixel(pool, stars[i].pixel_x, stars[i].pixel_y);
-    }
-
-    // Обновляем координаты ВСЕХ звездочек
-    for (int i = 0; i < QUANTITY_STARS; i++) {
-      stars[i].pixel_x += stars[i].move_on_x;
-      stars[i].pixel_y += stars[i].move_on_y;
-
-      // Проверка границ для каждой звезды
-      if (stars[i].pixel_x <= 1 || stars[i].pixel_x >= LE - 2) {
-        stars[i].move_on_x = -stars[i].move_on_x;
-      }
-      if (stars[i].pixel_y <= 1 || stars[i].pixel_y >= HI - 2) {
-        stars[i].move_on_y = -stars[i].move_on_y;
-      }
-    }
-
-    check_collisions(stars, QUANTITY_STARS);
-
-    // Рисуем активные звезды
-    for (int i = 0; i < QUANTITY_STARS; i++) {
-      if (stars[i].is_active) {
-        draw_pixel(pool, stars[i].pixel_x, stars[i].pixel_y);
-      }
-    }
-
-    clear_pool();
-    draw_pool(pool, stars, QUANTITY_STARS);
-
-    // Задержка для анимации
+    int pool[HI][LE];
+    
+    // Инициализация случайных чисел
+    srand(time(NULL));
+    
+    // Инициализируем границы
+    set_border(pool);
+    
+    // Инициализируем звезды
+    init_stars(stars, QUANTITY_STARS);
+    
+    while (1) {
+        // Очищаем старые позиции звезд
+        for (int i = 0; i < QUANTITY_STARS; i++) {
+            if (stars[i].is_active) {
+                clear_position(pool, stars[i].pixel_x, stars[i].pixel_y);
+            }
+        }
+        
+        // Двигаем звезды
+        move_stars(stars, QUANTITY_STARS);
+        
+        check_collisions(stars, QUANTITY_STARS);
+        
+        // Ставим новые позиции
+        for (int i = 0; i < QUANTITY_STARS; i++) {
+            if (stars[i].is_active) {
+                int value;
+                switch(stars[i].type) {
+                    case 'o': value = 2; break;  // ORDER
+                    case 'O': value = 3; break;  // ALFA_ORDER
+                    case 'x': value = 4; break;  // CHAOS
+                    case 'X': value = 5; break;  // ALFA_CHAOS
+                    default:  value = 0;
+                }
+                set_star_position(pool, stars[i].pixel_x, stars[i].pixel_y, value);
+            }
+        }
+        
+        clear_pool();
+        draw_pool_new(pool);
+        
+        // Задержка для анимации (исправленная версия)
 #ifdef _WIN32
-    Sleep(SPEED); // Windows
+        Sleep(SPEED); // Windows
 #else
-    usleep(100000); // Linux/Mac
+        sleep(SPEED * 1000); // Linux/Mac (переводим миллисекунды в микросекунды)
 #endif
-  }
-
-  return 0;
+    }
+    
+    return 0;
 }
+
+// Остальные функции остаются без изменений...
 
 // Функция инициализации звезд
 void init_stars(astra stars[], int count) {
   for (int i = 0; i < count; i++) {
     // Случайные координаты внутри поля (1..LE-2 и 1..HI-2)
-    stars[i].pixel_x = (rand() % (LE - 2)) + 1; // от 1 до 28
-    stars[i].pixel_y = (rand() % (HI - 2)) + 1; // от 1 до 8
+    stars[i].pixel_x = (rand() % (LE - 2)) + 1;
+    stars[i].pixel_y = (rand() % (HI - 2)) + 1;
 
     // Случайное направление: -1, 0 или 1
     stars[i].move_on_x = (rand() % 3) - 1;
@@ -126,13 +135,13 @@ void draw_pool(int pool[HI][LE], astra stars[], int count) {
 }
 
 void draw_pixel(int pool[HI][LE], int x, int y) {
-  if (x >= 1 && x < LE - 1 && y >= 1 && y < HI - 1) {
+  if (x >= 0 && x < LE && y >= 0 && y < HI) {
     pool[y][x] = 2;
   }
 }
 
 void clear_pixel(int pool[HI][LE], int x, int y) {
-  if (x >= 1 && x < LE - 1 && y >= 1 && y < HI - 1) {
+  if (x >= 0 && x < LE && y >= 0 && y < HI) {
     pool[y][x] = 0;
   }
 }
@@ -225,3 +234,102 @@ void reset_text_color() {
 // 		break;
 // 	}
 // }
+
+
+
+// Установка границ
+void set_border(int pool[HI][LE]) {
+    for (int i = 0; i < HI; i++) {
+        for (int j = 0; j < LE; j++) {
+            if (i == 0 || i == HI - 1 || j == 0 || j == LE - 1) {
+                pool[i][j] = 1;  // граница = 1
+            } else {
+                pool[i][j] = 0;  // пусто = 0
+            }
+        }
+    }
+}
+
+// Установка позиции звезды с определенным значением
+void set_star_position(int pool[HI][LE], int x, int y, int value) {
+    if (x >= 1 && x < LE - 1 && y >= 1 && y < HI - 1) {
+        pool[y][x] = value;  // значение зависит от типа существа
+    }
+}
+
+// Очистка позиции
+void clear_position(int pool[HI][LE], int x, int y) {
+    if (x >= 1 && x < LE - 1 && y >= 1 && y < HI - 1) {
+        pool[y][x] = 0;  // пусто
+    }
+}
+
+// Новая функция отрисовки
+void draw_pool_new(int pool[HI][LE]) {
+    for (int i = 0; i < HI; i++) {
+        for (int j = 0; j < LE; j++) {
+            int value = pool[i][j];
+            
+            if (value == 1) {  // граница
+                set_text_color(BORDER_COLOR);
+                printf("*");
+                reset_text_color();
+            }
+            else if (value == 2) {  // ORDER 'o'
+                set_text_color(ORDER_COLOR);
+                printf("o");
+                reset_text_color();
+            }
+            else if (value == 3) {  // ALFA_ORDER 'O'
+                set_text_color(ALFA_ORDER_COLOR);
+                printf("O");
+                reset_text_color();
+            }
+            else if (value == 4) {  // CHAOS 'x'
+                set_text_color(CHAOS_COLOR);
+                printf("x");
+                reset_text_color();
+            }
+            else if (value == 5) {  // ALFA_CHAOS 'X'
+                set_text_color(ALFA_CHAOS_COLOR);
+                printf("X");
+                reset_text_color();
+            }
+            else {
+                printf(" ");  // пусто (0)
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Функция движения звезд (добавь после init_stars)
+void move_stars(astra stars[], int count) {
+    for (int i = 0; i < count; i++) {
+        if (!stars[i].is_active)
+            continue;
+        
+        // Сохраняем старые координаты
+        int old_x = stars[i].pixel_x;
+        int old_y = stars[i].pixel_y;
+        
+        // Вычисляем новые координаты
+        int new_x = old_x + stars[i].move_on_x;
+        int new_y = old_y + stars[i].move_on_y;
+        
+        // Проверяем столкновение с границами
+        if (new_x <= 0 || new_x >= LE - 1) {
+            stars[i].move_on_x = -stars[i].move_on_x; // Отскок по X
+            new_x = old_x + stars[i].move_on_x; // Пересчитываем с новым направлением
+        }
+        
+        if (new_y <= 0 || new_y >= HI - 1) {
+            stars[i].move_on_y = -stars[i].move_on_y; // Отскок по Y
+            new_y = old_y + stars[i].move_on_y; // Пересчитываем с новым направлением
+        }
+        
+        // Устанавливаем новые координаты
+        stars[i].pixel_x = new_x;
+        stars[i].pixel_y = new_y;
+    }
+}
