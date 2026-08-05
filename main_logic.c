@@ -104,7 +104,7 @@ void draw_pool_ncurses(int pool[HI][LE]) {
 
 int main() {
     int pool[HI][LE];
-    int active_star_count = QUANTITY_STARS;
+    // int active_star_count = QUANTITY_STARS;
     
     // Инициализация ncurses
     initscr();

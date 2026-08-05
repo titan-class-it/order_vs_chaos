@@ -20,7 +20,7 @@ typedef struct
 
 #define HI 30
 #define LE 90
-#define QUANTITY_STARS 1000
+#define QUANTITY_STARS 300
 #define SPEED 100
 
 #define ORDER 'o'
